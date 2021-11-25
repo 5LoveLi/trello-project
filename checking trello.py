@@ -40,5 +40,161 @@ def checking_number_lists(id_board):
 
 
 
+
+# Вспомогательная функция для проверки первой карточки 
+# Провекра чек-листа в первой карточке
+
+def checking_checklist(id_checklist):
+    standard = ['Создать доску', 
+    'Подключить 2 других участников команды',
+    'Создать 3 списка',
+    'Создать карточку',
+    'Установить для карточки срок, участников и добавить обложку',
+    'Создать описание с различными шрифтами',
+    'Создать ссылку на Google Meet',
+    'Написать комментарий',
+    'Подключить улучшение',
+    'Прикрепить во вложении предыдущую лабораторную с Google диска',
+    'Добавить 3 новые карточки',
+    'Применить минимум 1 горячую клавишу',
+    'Оставить отзыв о лабораторной работе',
+    ]
+
+    checklist = requests.get('https://api.trello.com/1/checklists/' + id_checklist)
+    checklist_json = json.loads(checklist.text)['checkItems']
+    points = [point['name'] for point in checklist_json]
+    result = 1
+    for point in points:
+        if point in standard:
+            pass
+        else:
+            result = 0 
+    return result
+    
+
+# Вспомогательная функция для проверки первой карточки 
+# Провека описания первой карточки 
+def checking_card_description(text):
+    result = 1
+    if 'Заголовок первого уровня' in text and '===' in text:
+        pass
+    else:
+        result = 0
+        print('Неправильный 1 пункт в описание карточки')
+
+    if 'Заголовок второго уровня' in text and '---' in text:
+        pass
+    else:
+        result = 0
+        print('Неправильный 2 пункт в описание карточки')
+
+    if 'Заголовок третьего уровня' in text and '###' in text:
+        pass
+    else:
+        result = 0
+        print('Неправильный 3 пункт в описание карточки')
+
+    if '*Курсив*' in text:
+        pass
+    else:
+        result = 0
+        print('Неправильный 4 пункт в описание карточки')
+
+    if '**Жирный**' in text:
+        pass
+    else:
+        result = 0
+        print('Неправильный 5 пункт в описание карточки')
+
+    if '~~Зачеркнутый~~' in text:
+        pass
+    else:
+        result = 0
+        print('Неправильный 6 пункт в описание карточки')
+
+    if 'Ссылка на Google Meet]' in text:
+        pass
+    else:
+        result = 0
+        print('Неправильный 7 пункт в описание карточки')
+
+    return result
+
+
+
+# Проверка первой карточки
+
+def checking_first_list(id_board):
+    id_first_list = get_lists_id_by_border_id(id_board)[0]
+    list_name = json.loads(requests.get('https://api.trello.com/1/lists/' + id_first_list).text)['name']
+    id_task = get_tasks_id_by_list_id(id_first_list)
+    task = get_task_by_id(id_task[0])
+    
+    result = 1
+
+    if len(id_task) == 1:
+        id_task = id_task[0]
+        name = get_task_by_id(id_task)['name']
+
+        if list_name == 'Планы': #Проверка что карточка находится в нужном столбце/списке
+            pass
+        else:
+            print('Список должен иметь название "Планы"')
+
+        if name == 'Лабораторная работа Trello': # Проверка что карточка правильно названна
+            pass
+        else:
+            print('Карточка должна иметь название "Лабораторная работа Trello"')
+            result = 0
+        
+        if task['cover']['idUploadedBackground']  != None: #Проверка что столбец/список имеет обложку
+            pass
+        else:
+            print('Cписок должен содержать обложку')
+            result = 0
+
+        if task['due'] != None: # Проверка что в на карточке есть дата 
+            pass
+        else:
+            print('Должна быть указанна дата')
+            result = 0
+
+        if len(task['idMembers']) != 0: #Проверка что к карточке прикрепленны люди
+            pass
+        else:
+            print('К карточке должно быть прикрепленно 3 человека, включая вас')
+            result = 0
+
+        if checking_checklist(task['idChecklists'][0]) == 1: #Проверка наличия/правильности чек-листа
+            pass
+        else:
+            print('В карточке должен быть чеклист/ чеклист частично неправильный')
+            result = 0
+
+        if task['badges']['attachments'] != 0: # Проверка наличия прикрепленного файла 
+            pass
+        else:
+            print('К карточке должен быть прикреплен файл')
+            result = 0
+
+        if checking_card_description(task['desc']) == 1: # Проверка описания карточки 
+            pass
+        else:
+            result = 0
+
+        if task['badges']['comments'] != 0: # Проверка наличия коментария
+            pass
+        else:
+            print('Нет комментариев')
+            result = 0 
+
+    else:
+        print('В первом списке "Планы" должны быть только одна карточка')
+        result = 0 
+    return 'проверка первой карточки', result
+
+
+
+
 link = input()  # На вход программы подается ссылка на трелло которое надо проверить
 id_board = get_board_id_by_external_link(link)

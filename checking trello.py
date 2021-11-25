@@ -26,8 +26,27 @@ def get_task_by_id(id_task):
     return task_json
 
 
+#Провека списка с тремя карточками к каждой из которых приклеплен хотя бы один человек 
+# Это может быть любой список кроме "Планы"
 
-# Проверка количества столбцов/списков по критерия в лабе 
+def search_and_check_list_with_three_cards(id_board): 
+    result = 0
+    for list_id in get_lists_id_by_border_id(id_board):
+        if len(get_tasks_id_by_list_id(list_id)) == 3:
+            for task_id in get_tasks_id_by_list_id(list_id):
+                if  len(get_task_by_id(task_id)['idMembers']) >= 1:
+                    result += 1
+
+    if result == 3:
+        result = 1
+    else:
+        result = 0
+        print
+
+    return 'Проверка столбца с тремя карточками',  result
+
+
+# Проверка количества столбцов/списков по критериям в лабе 
 
 def checking_number_lists(id_board):
     lists_number = len(get_lists_id_by_border_id(id_board))
@@ -196,5 +215,8 @@ def checking_first_list(id_board):
 
 
 
-link = input()  # На вход программы подается ссылка на трелло которое надо проверить
+link = 'https://trello.com/b/vhC7l6lc/test12'  # На вход программы подается ссылка на трелло которое надо проверить
 id_board = get_board_id_by_external_link(link)
+
+
+print(search_and_check_list_with_three_cards(id_board))

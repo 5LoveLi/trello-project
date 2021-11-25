@@ -24,3 +24,21 @@ def get_task_by_id(id_task):
     task = requests.get('https://api.trello.com/1/cards/' + id_task)
     task_json = json.loads(task.text)
     return task_json
+
+
+
+# Проверка количества столбцов/списков по критерия в лабе 
+
+def checking_number_lists(id_board):
+    lists_number = len(get_lists_id_by_border_id(id_board))
+    if lists_number >= 5:
+        result = 1
+    else:
+        print('Недостаточно столбцов')
+        result = 0
+    return 'Проверка количества cписков/столбцов', result
+
+
+
+link = input()  # На вход программы подается ссылка на трелло которое надо проверить
+id_board = get_board_id_by_external_link(link)

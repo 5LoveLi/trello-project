@@ -33,15 +33,19 @@ def search_and_check_list_with_three_cards(id_board):
     result = 0
     for list_id in get_lists_id_by_border_id(id_board):
         if len(get_tasks_id_by_list_id(list_id)) == 3:
+            result = 1
             for task_id in get_tasks_id_by_list_id(list_id):
                 if  len(get_task_by_id(task_id)['idMembers']) >= 1:
                     result += 1
 
-    if result == 3:
+    if result == 4:
         result = 1
+    elif result != 0:
+        result = 0
+        print('Не ко всем карточкам прикрепленны люди')
     else:
         result = 0
-        print
+        print('Нет списка с тремя карточками')
 
     return 'Проверка столбца с тремя карточками',  result
 

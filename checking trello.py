@@ -26,7 +26,31 @@ def get_task_by_id(id_task):
     return task_json
 
 
-#Провека списка с тремя карточками к каждой из которых приклеплен хотя бы один человек 
+#Проверка названия списков
+def checking_names_lists(id_board):
+    standard = ['Планы', 'В процессе', 'Готово']
+    list_names = []
+    id_lists = get_lists_id_by_border_id(id_board)
+    for id in id_lists:
+        list_names.append(json.loads(requests.get('https://api.trello.com/1/lists/' + id).text)['name'])
+    
+
+    result = 0
+    for name in standard:
+        if name in list_names:
+            result += 1
+        else:
+            result = 0 
+
+    if result == 3:
+        result = 1
+    else:
+        result = 0
+        print('Не все названия списков соответствуют условиям')
+    
+    return 'Проверка названия списков', result
+
+#Провека списка с тремя карточками к каждой из которых прикреплен хотя бы один человек 
 # Это может быть любой список кроме "Планы"
 
 def search_and_check_list_with_three_cards(id_board): 
@@ -65,7 +89,7 @@ def checking_number_lists(id_board):
 
 
 # Вспомогательная функция для проверки первой карточки 
-# Провекра чек-листа в первой карточке
+# Проверка чек-листа в первой карточке
 
 def checking_checklist(id_checklist):
     standard = ['Создать доску', 
@@ -223,4 +247,4 @@ link = 'https://trello.com/b/vhC7l6lc/test12'  # На вход программ�
 id_board = get_board_id_by_external_link(link)
 
 
-print(search_and_check_list_with_three_cards(id_board))
+print(checking_names_lists(id_board))

@@ -26,9 +26,28 @@ def get_task_by_id(id_task):
     return task_json
 
 
+
+# Проверка что карточка 'Любая мелочь' имеет содержимое
+def checking_contents_list(id_board):
+    id_list = get_lists_id_by_border_id(id_board)
+    result = 0
+    for id in id_list:
+        if json.loads(requests.get('https://api.trello.com/1/lists/' + id).text)['name'] == 'Любая мелочь':
+            id_task = get_tasks_id_by_list_id(id)
+            result = 1
+    
+    if len(id_task) > 0:
+        result = 1
+    else:
+        result = 0
+        print('У списка нет содержания')
+    
+    return 'Проверка что список "Любая мелочь" имеет содержимое', result
+
+
 #Проверка названия списков
 def checking_names_lists(id_board):
-    standard = ['Планы', 'В процессе', 'Готово']
+    standard = ['Планы', 'В процессе', 'Готово', 'Любая мелочь']
     list_names = []
     id_lists = get_lists_id_by_border_id(id_board)
     for id in id_lists:
@@ -41,12 +60,12 @@ def checking_names_lists(id_board):
             result += 1
         else:
             result = 0 
+            print('Нет карточки с названием ', name)
 
-    if result == 3:
+    if result == 4:
         result = 1
     else:
         result = 0
-        print('Не все названия списков соответствуют условиям')
     
     return 'Проверка названия списков', result
 
@@ -170,7 +189,7 @@ def checking_card_description(text):
 
 
 # Проверка первой карточки
-
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 def checking_first_list(id_board):
     id_first_list = get_lists_id_by_border_id(id_board)[0]
     list_name = json.loads(requests.get('https://api.trello.com/1/lists/' + id_first_list).text)['name']
@@ -247,4 +266,11 @@ link = 'https://trello.com/b/vhC7l6lc/test12'  # На вход программ�
 id_board = get_board_id_by_external_link(link)
 
 
-print(checking_names_lists(id_board))
+def calling_all_functions(id_board):
+    print(checking_number_lists(id_board))
+    print(checking_names_lists(id_board))  
+    print(checking_first_list(id_board))
+    print(search_and_check_list_with_three_cards(id_board))
+    print(checking_contents_list(id_board))
+
+calling_all_functions(id_board)

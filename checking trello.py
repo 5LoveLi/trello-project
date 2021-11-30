@@ -42,7 +42,8 @@ def checking_contents_list(id_board):
         result = 0
         print('У списка нет содержания')
     
-    return 'Проверка что список "Любая мелочь" имеет содержимое', result
+    #return 'Проверка что список "Любая мелочь" имеет содержимое', result
+    return result
 
 
 #Проверка названия списков
@@ -67,7 +68,8 @@ def checking_names_lists(id_board):
     else:
         result = 0
     
-    return 'Проверка названия списков', result
+    # return 'Проверка названия списков', result
+    return result
 
 #Провека списка с тремя карточками к каждой из которых прикреплен хотя бы один человек 
 # Это может быть любой список кроме "Планы"
@@ -90,7 +92,8 @@ def search_and_check_list_with_three_cards(id_board):
         result = 0
         print('Нет списка с тремя карточками')
 
-    return 'Проверка столбца с тремя карточками',  result
+    # return 'Проверка столбца с тремя карточками',  result
+    return result
 
 
 # Проверка количества столбцов/списков по критериям в лабе 
@@ -102,7 +105,8 @@ def checking_number_lists(id_board):
     else:
         print('Недостаточно столбцов')
         result = 0
-    return 'Проверка количества cписков/столбцов', result
+    # return 'Проверка количества cписков/столбцов', result
+    return result
 
 
 
@@ -191,73 +195,66 @@ def checking_card_description(text):
 # Проверка первой карточки
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 def checking_first_list(id_board):
+    print('проверка первой карточки')
     id_first_list = get_lists_id_by_border_id(id_board)[0]
     list_name = json.loads(requests.get('https://api.trello.com/1/lists/' + id_first_list).text)['name']
     id_task = get_tasks_id_by_list_id(id_first_list)
     task = get_task_by_id(id_task[0])
     
-    result = 1
+    result = 0
 
     if len(id_task) == 1:
+        result = 0.1
         id_task = id_task[0]
         name = get_task_by_id(id_task)['name']
 
         if list_name == 'Планы': #Проверка что карточка находится в нужном столбце/списке
-            pass
+            result += 0.1
         else:
             print('Список должен иметь название "Планы"')
 
         if name == 'Лабораторная работа Trello': # Проверка что карточка правильно названна
-            pass
+            result += 0.1
         else:
             print('Карточка должна иметь название "Лабораторная работа Trello"')
-            result = 0
         
         if task['cover']['idUploadedBackground']  != None: #Проверка что столбец/список имеет обложку
-            pass
+            result += 0.1
         else:
             print('Cписок должен содержать обложку')
-            result = 0
 
         if task['due'] != None: # Проверка что в на карточке есть дата 
-            pass
+            result += 0.1
         else:
             print('Должна быть указанна дата')
-            result = 0
 
         if len(task['idMembers']) != 0: #Проверка что к карточке прикрепленны люди
-            pass
+            result += 0.1
         else:
             print('К карточке должно быть прикрепленно 3 человека, включая вас')
-            result = 0
 
         if checking_checklist(task['idChecklists'][0]) == 1: #Проверка наличия/правильности чек-листа
-            pass
+            result += 0.1
         else:
             print('В карточке должен быть чеклист/ чеклист частично неправильный')
-            result = 0
 
         if task['badges']['attachments'] != 0: # Проверка наличия прикрепленного файла 
-            pass
+            result += 0.1
         else:
             print('К карточке должен быть прикреплен файл')
-            result = 0
 
         if checking_card_description(task['desc']) == 1: # Проверка описания карточки 
-            pass
-        else:
-            result = 0
+            result += 0.1
 
         if task['badges']['comments'] != 0: # Проверка наличия коментария
-            pass
+            result += 0.1
         else:
             print('Нет комментариев')
-            result = 0 
 
     else:
         print('В первом списке "Планы" должны быть только одна карточка')
-        result = 0 
-    return 'проверка первой карточки', result
+    # return 'проверка первой карточки', result
+    return float(result)
 
 
 
@@ -267,10 +264,10 @@ id_board = get_board_id_by_external_link(link)
 
 
 def calling_all_functions(id_board):
-    print(checking_number_lists(id_board))
-    print(checking_names_lists(id_board))  
-    print(checking_first_list(id_board))
-    print(search_and_check_list_with_three_cards(id_board))
-    print(checking_contents_list(id_board))
+    result = checking_number_lists(id_board) * 10 + checking_names_lists(id_board) * 10 + search_and_check_list_with_three_cards(id_board) * 10 + checking_contents_list(id_board) * 10 
+    result += checking_first_list(id_board) * 60
+    result = str(result) + '%'
+    return result
 
-calling_all_functions(id_board)
+
+print(calling_all_functions(id_board))
